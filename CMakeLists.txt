@@ -41,6 +41,10 @@ endif()
 #                   For example '43xx_m4' or '43xx_m0'.
 include(cmake/chip_libraries.cmake)
 
+CPM_AddModule("lpc_tools"
+        GIT_REPOSITORY "https://github.com/JitterCompany/lpc_tools.git"
+        GIT_TAG "2.3")
+
 CPM_InitModule(${CPM_MODULE_NAME})
 
 #------------------------------------------------------------------------------
