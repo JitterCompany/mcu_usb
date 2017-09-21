@@ -1,12 +1,15 @@
 #ifndef USB_DESCRIPTORS_H_
 #define USB_DESCRIPTORS_H_
 
-//#include <lpc_usb_lib/USB.h>
-#include "usb_type.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+
+#include "descriptor_types.h"
+
 /** Public API **/
+
+
 
 // may need adjustments for more than 6 endpoints or long string descriptors
 #ifndef DESC_BUFF_SZ

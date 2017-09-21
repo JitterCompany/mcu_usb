@@ -3,10 +3,16 @@
 
 #include <chip.h>
 
+#include "mcu_usb.h"
+#include "descriptor_types.h"
+
 #include "usb_core.h"
 #include "usb_queue.h"
 #include "usb_standard_request.h"
 #include "usb_endpoint.h"
+
+
+
 
 
 USBQueueHead usb_qh0[12] ATTR_ALIGNED(2048);

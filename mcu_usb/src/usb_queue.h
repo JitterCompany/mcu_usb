@@ -2,8 +2,6 @@
 #define __USB_QUEUE_H__
 
 #include "lpc43xx_usb.h"
-
-#include "usb_type.h"
 #include "mcu_usb.h"
 
 typedef struct _usb_transfer_t usb_transfer_t;

@@ -1,9 +1,9 @@
 #ifndef USB_ENDPOINT_H
 #define USB_ENDPOINT_H
 
-#include "usb_type.h"
 #include <stdint.h>
 #include <stddef.h>
+#include "mcu_usb.h"
 
 
 

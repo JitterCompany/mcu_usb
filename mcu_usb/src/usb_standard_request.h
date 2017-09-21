@@ -1,7 +1,7 @@
 #ifndef __USB_STANDARD_REQUEST_H__
 #define __USB_STANDARD_REQUEST_H__
 
-#include "usb_type.h"
+#include "mcu_usb.h"
 
 bool usb_set_configuration(
 	USBDevice* const device,

@@ -23,6 +23,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+// TODO: Move this to some common compiler-tricks location.
+#define ATTR_ALIGNED(x)	__attribute__ ((aligned(x)))
+#define ATTR_SECTION(x) __attribute__ ((section(x)))
+
+#define VERSION_BCD(x) CPU_TO_LE16((((VERSION_TENS(x) << 4) | VERSION_ONES(x)) << 8) | \
+								   ((VERSION_TENTHS(x) << 4) | VERSION_HUNDREDTHS(x)))
+
 /* This must be placed around external function declaration for C++
  * support. */
 #ifdef __cplusplus

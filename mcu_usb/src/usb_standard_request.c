@@ -1,11 +1,25 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "usb_request.h"
 #include "usb_standard_request.h"
 #include "mcu_usb.h"
 #include "usb_core.h"
-#include "usb_type.h"
 #include "usb_queue.h"
+
+typedef enum {
+	USB_STANDARD_REQUEST_GET_STATUS = 0,
+	USB_STANDARD_REQUEST_CLEAR_FEATURE = 1,
+	USB_STANDARD_REQUEST_SET_FEATURE = 3,
+	USB_STANDARD_REQUEST_SET_ADDRESS = 5,
+	USB_STANDARD_REQUEST_GET_DESCRIPTOR = 6,
+	USB_STANDARD_REQUEST_SET_DESCRIPTOR = 7,
+	USB_STANDARD_REQUEST_GET_CONFIGURATION = 8,
+	USB_STANDARD_REQUEST_SET_CONFIGURATION = 9,
+	USB_STANDARD_REQUEST_GET_INTERFACE = 10,
+	USB_STANDARD_REQUEST_SET_INTERFACE = 11,
+	USB_STANDARD_REQUEST_SYNCH_FRAME = 12,
+} USBStandardRequest;
 
 void (*usb_configuration_changed_cb)(USBDevice* const) = NULL;
 

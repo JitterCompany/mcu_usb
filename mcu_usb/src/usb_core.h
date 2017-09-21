@@ -4,11 +4,17 @@
 // TODO: Refactor to support high performance operations without having to
 // expose USBTransferDescriptor. Or usb_endpoint_prime(). Or, or, or...
 #include "lpc43xx_usb.h"
-#include "usb_type.h"
+#include "mcu_usb.h"
 
 #define NUM_USB_CONTROLLERS 2
 #define NUM_USB0_ENDPOINTS 6
 #define NUM_USB1_ENDPOINTS 4
+
+typedef enum {
+	USB_TRANSFER_DIRECTION_OUT = 0,
+	USB_TRANSFER_DIRECTION_IN = 1,
+} USBTransferDirection;
+
 
 
 void usb_bus_reset(
