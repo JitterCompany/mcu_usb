@@ -12,9 +12,6 @@
 #include "usb_endpoint.h"
 
 
-
-
-
 USBQueueHead usb_qh0[12] ATTR_ALIGNED(2048);
 USBQueueHead usb_qh1[12] ATTR_ALIGNED(2048);
 
@@ -22,7 +19,7 @@ static USBDevice *devices[NUM_USB_CONTROLLERS];
 
 #define USB_QH_INDEX(endpoint_address) (((endpoint_address & 0xF) * 2) + ((endpoint_address >> 7) & 1))
 
-USBQueueHead* usb_queue_head(
+static USBQueueHead* usb_queue_head(
 	const uint_fast8_t endpoint_address,
 	const USBDevice* const device
 ) {
@@ -30,14 +27,14 @@ USBQueueHead* usb_queue_head(
 	return &endpoint_list[USB_QH_INDEX(endpoint_address)];
 }
 
-USBEndpoint* usb_endpoint_from_address(
+static USBEndpoint* usb_endpoint_from_address(
 	const uint_fast8_t endpoint_address,
 	const USBDevice* const device
 ) {
 	return (USBEndpoint*)usb_queue_head(endpoint_address, device)->_reserved_0;
 }
 
-uint_fast8_t usb_endpoint_address(
+static uint_fast8_t usb_endpoint_address(
     const USBTransferDirection direction,
     const uint_fast8_t number
 ) {
@@ -81,17 +78,6 @@ static void usb_endpoint_reset(const USBDevice* const device) {
 			| USB1_ENDPTCTRL0_TXT1_0(USB_TRANSFER_TYPE_BULK);
 		USB1_ENDPTCTRL3 =USB0_ENDPTCTRL0_RXT1_0(USB_TRANSFER_TYPE_BULK) 
 			| USB1_ENDPTCTRL0_TXT1_0(USB_TRANSFER_TYPE_BULK);
-	}
-}
-
-void usb_peripheral_reset(const USBDevice* const device) {
-	if( device->controller == 0 ) {    
-        Chip_RGU_TriggerReset(RGU_USB0_RST);
-        while(Chip_RGU_InReset(RGU_USB0_RST));
-    }
-    if( device->controller == 1 ) {
-        Chip_RGU_TriggerReset(RGU_USB1_RST);
-        while(Chip_RGU_InReset(RGU_USB1_RST));
 	}
 }
 
@@ -242,6 +228,19 @@ static void usb_endpoint_clear_pending_interrupts(
 	}
 }
 
+
+void usb_peripheral_reset(const USBDevice* const device) {
+	if( device->controller == 0 ) {    
+        Chip_RGU_TriggerReset(RGU_USB0_RST);
+        while(Chip_RGU_InReset(RGU_USB0_RST));
+    }
+    if( device->controller == 1 ) {
+        Chip_RGU_TriggerReset(RGU_USB1_RST);
+        while(Chip_RGU_InReset(RGU_USB1_RST));
+	}
+}
+
+
 void usb_endpoint_disable(
 	const USBEndpoint* const endpoint
 ) {
@@ -266,7 +265,7 @@ void usb_endpoint_disable(
 	usb_endpoint_flush(endpoint);
 }
 
-void usb_endpoint_prime(
+static void usb_endpoint_prime(
 	const USBEndpoint* const endpoint,
 	USBTransferDescriptor* const first_td	
 ) {
@@ -316,8 +315,6 @@ static bool usb_endpoint_is_priming(
 	}
 }
 
-// Schedule an already filled-in transfer descriptor for execution on
-// the given endpoint, waiting until the endpoint has finished.
 void usb_endpoint_schedule_wait(
 	const USBEndpoint* const endpoint,
 	USBTransferDescriptor* const td
@@ -332,11 +329,6 @@ void usb_endpoint_schedule_wait(
 	usb_endpoint_prime(endpoint, td);
 }
 
-// Schedule an already filled-in transfer descriptor for execution on
-// the given endpoint, appending to the end of the endpoint's queue if
-// there are pending TDs. Note that this requires that one knows the
-// tail of the endpoint's TD queue. Moreover, the user is responsible
-// for setting the TERMINATE bit of next_dtd_pointer if needed.
 void usb_endpoint_schedule_append(
 	const USBEndpoint* const endpoint,
 	USBTransferDescriptor* const tail_td,
@@ -395,18 +387,7 @@ void usb_endpoint_flush(
 		}
 	}
 }
-/*
-static bool usb_endpoint_is_flushing(
-	const USBEndpoint* const endpoint
-) {
-	const uint_fast8_t endpoint_number = usb_endpoint_number(endpoint->address);
-	if( usb_endpoint_is_in(endpoint->address) ) {
-		return USB0_ENDPTFLUSH & USB0_ENDPTFLUSH_FETB(1 << endpoint_number);
-	} else {
-		return USB0_ENDPTFLUSH & USB0_ENDPTFLUSH_FERB(1 << endpoint_number);
-	}
-}
-*/
+
 bool usb_endpoint_is_ready(
 	const USBEndpoint* const endpoint
 ) {
@@ -849,7 +830,7 @@ void usb_endpoint_init(
 	USBTransferType transfer_type = USB_TRANSFER_TYPE_CONTROL;
 	const USBDescriptorEndpoint* const endpoint_descriptor = usb_endpoint_descriptor(endpoint);
 	if( endpoint_descriptor ) {
-		max_packet_size = usb_endpoint_descriptor_max_packet_size(endpoint_descriptor);
+		max_packet_size = endpoint_descriptor->wMaxPacketSize;
 		transfer_type = usb_endpoint_descriptor_transfer_type(endpoint_descriptor);
 	}
 
@@ -955,20 +936,32 @@ void USB0_IRQHandler() {
 
 	if( status & USB0_USBSTS_D_SRI ) {
 		// Start Of Frame received.
+		if (devices[0]->start_of_frame) {
+			devices[0]->start_of_frame();
+		}
 	}
 
 	if( status & USB0_USBSTS_D_PCI ) {
 		// Port change detect:
 		// Port controller entered full- or high-speed operational state.
+		if (devices[0]->port_change) {
+			devices[0]->port_change();
+		}
 	}
 
 	if( status & USB0_USBSTS_D_SLI ) {
 		// Device controller suspend.
+		if (devices[0]->suspend) {
+			devices[0]->suspend();
+		}
 	}
 
 	if( status & USB0_USBSTS_D_URI ) {
 		// USB reset received.
 		usb_bus_reset(devices[0]);
+		if (devices[0]->bus_reset) {
+			devices[0]->bus_reset();
+		}
 	}
 
 	if( status & USB0_USBSTS_D_UEI ) {

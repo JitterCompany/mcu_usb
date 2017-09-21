@@ -46,11 +46,6 @@ const USBDescriptorEndpoint *usb_endpoint_descriptor(
     return 0;
 }
 
-uint_fast16_t usb_endpoint_descriptor_max_packet_size(
-	const USBDescriptorEndpoint* const endpoint_descriptor
-) {
-	return endpoint_descriptor->wMaxPacketSize;
-}
 
 USBTransferType usb_endpoint_descriptor_transfer_type(
 	const USBDescriptorEndpoint* const endpoint_descriptor

@@ -53,6 +53,8 @@ typedef struct
     usb_request_handler_fn reserved;
 } USBRequestHandlers;
 
+typedef void (*USBEvent_cb)();
+
 typedef struct
 {
     USBDescriptorDevice *descriptor;
@@ -63,6 +65,11 @@ typedef struct
     const USBConfiguration *configuration; // Pointer to current configuration
     uint8_t controller;                    // USB0 or USB1 peripheral;
     const USBRequestHandlers *request_handlers;
+
+    USBEvent_cb start_of_frame;
+    USBEvent_cb port_change;
+    USBEvent_cb bus_reset;
+    USBEvent_cb suspend;
 } USBDevice;
 
 typedef struct __attribute__((packed))
@@ -108,6 +115,7 @@ struct USBEndpoint
 };
 
 typedef void (*Endpoint_cb)(USBEndpoint *const endpoint);
+
 
 USBEndpoint *usb_endpoint_create(USBEndpoint *endpoint, uint8_t bEndpointAddress,
                                  USBDevice *device, USBEndpoint *other_endpoint,

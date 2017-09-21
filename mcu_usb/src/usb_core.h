@@ -1,8 +1,6 @@
 #ifndef __USB_CORE_H__
 #define __USB_CORE_H__
 
-// TODO: Refactor to support high performance operations without having to
-// expose USBTransferDescriptor. Or usb_endpoint_prime(). Or, or, or...
 #include "lpc43xx_usb.h"
 #include "mcu_usb.h"
 
@@ -19,21 +17,6 @@ typedef enum {
 
 void usb_bus_reset(
 	USBDevice* const device
-);
-
-USBQueueHead* usb_queue_head(
-	const uint_fast8_t endpoint_address,
-	const USBDevice* const device
-);
-
-USBEndpoint* usb_endpoint_from_address(
-	const uint_fast8_t endpoint_address,
-	const USBDevice* const device
-);
-
-uint_fast8_t usb_endpoint_address(
-	const USBTransferDirection direction,
-	const uint_fast8_t number
 );
 
 void usb_controller_reset(
@@ -110,16 +93,18 @@ bool usb_endpoint_is_ready(
 	const USBEndpoint* const endpoint
 );
 
-void usb_endpoint_prime(
-	const USBEndpoint* const endpoint,
-	USBTransferDescriptor* const first_td
-);
-
+// Schedule an already filled-in transfer descriptor for execution on
+// the given endpoint, waiting until the endpoint has finished.
 void usb_endpoint_schedule_wait(
 	const USBEndpoint* const endpoint,
         USBTransferDescriptor* const td
 );
 
+// Schedule an already filled-in transfer descriptor for execution on
+// the given endpoint, appending to the end of the endpoint's queue if
+// there are pending TDs. Note that this requires that one knows the
+// tail of the endpoint's TD queue. Moreover, the user is responsible
+// for setting the TERMINATE bit of next_dtd_pointer if needed.
 void usb_endpoint_schedule_append(
         const USBEndpoint* const endpoint,
         USBTransferDescriptor* const tail_td,
