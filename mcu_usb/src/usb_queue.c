@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "mcu_usb.h"
 #include "sync.h"
 #include <lpc_tools/irq.h>
 

@@ -10,7 +10,6 @@
 #define NUM_USB0_ENDPOINTS 6
 #define NUM_USB1_ENDPOINTS 4
 
-void usb_peripheral_reset();
 
 void usb_bus_reset(
 	USBDevice* const device
@@ -31,21 +30,12 @@ uint_fast8_t usb_endpoint_address(
 	const uint_fast8_t number
 );
 
-void usb_device_init(
-	USBDevice* const device
-);
-
 void usb_controller_reset(
 	USBDevice* const device
 );
 
-
 void usb_controller_run(
 	const USBDevice* const device
-);
-
-void usb_run(
-	USBDevice* const device
 );
 
 void usb_run_tasks(
@@ -68,7 +58,6 @@ void usb_clear_endpoint_setup_status(
 	const uint32_t endpoint_setup_status,
 	const USBDevice* const device
 );
-
 
 uint32_t usb_get_endpoint_ready(
 	const USBDevice* const device
@@ -97,10 +86,6 @@ void usb_endpoint_init_without_descriptor(
 	const USBEndpoint* const endpoint,
   uint_fast16_t max_packet_size,
   USBTransferType transfer_type
-);
-
-void usb_endpoint_init(
-	const USBEndpoint* const endpoint
 );
 
 void usb_endpoint_stall(

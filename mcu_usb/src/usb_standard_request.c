@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 #include "usb_standard_request.h"
-
+#include "mcu_usb.h"
 #include "usb_core.h"
 #include "usb_type.h"
 #include "usb_queue.h"

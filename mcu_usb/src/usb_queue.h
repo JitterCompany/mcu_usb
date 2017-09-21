@@ -4,10 +4,10 @@
 #include "lpc43xx_usb.h"
 
 #include "usb_type.h"
+#include "mcu_usb.h"
 
 typedef struct _usb_transfer_t usb_transfer_t;
 typedef struct _usb_queue_t usb_queue_t;
-typedef void (*transfer_completion_cb)(void*, unsigned int);
 
 // This is an opaque datatype. Thou shall not touch these members.
 struct _usb_transfer_t {
@@ -41,22 +41,6 @@ typedef struct _usb_queue_t USBQueue;
 
 void usb_queue_flush_endpoint(const USBEndpoint* const endpoint);
 
-int usb_transfer_schedule(
-	const USBEndpoint* const endpoint,
-	void* const data,
-	const uint32_t maximum_length,
-        const transfer_completion_cb completion_cb,
-        void* const user_data
-);
-
-int usb_transfer_schedule_block(
-	const USBEndpoint* const endpoint,
-	void* const data,
-	const uint32_t maximum_length,
-        const transfer_completion_cb completion_cb,
-        void* const user_data
-);
-
 int usb_transfer_schedule_ack(
 	const USBEndpoint* const endpoint
 );
@@ -65,8 +49,6 @@ void usb_queue_init(
         usb_queue_t* const queue
 );
 
-void usb_queue_transfer_complete(
-        USBEndpoint* const endpoint
-);
+
 
 #endif//__USB_QUEUE_H__

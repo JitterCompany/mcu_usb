@@ -57,7 +57,7 @@ file(GLOB SOURCES
 
 include_directories(${CPM_MODULE_NAME} 
                     ${CPM_MODULE_NAME}/src)
+                    
 add_library(${CPM_LIB_TARGET_NAME} ${SOURCES})
 target_link_libraries(${CPM_LIB_TARGET_NAME} ${CPM_LIBRARIES})
-target_link_libraries(${CPM_LIB_TARGET_NAME} m)
 

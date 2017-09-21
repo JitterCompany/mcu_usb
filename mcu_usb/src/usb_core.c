@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "chip.h"
+#include <chip.h>
 
 #include "usb_core.h"
 #include "usb_queue.h"
