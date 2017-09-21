@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "usb_request.h"
 #include "usb_standard_request.h"
 #include "mcu_usb.h"
 #include "usb_core.h"
