@@ -1,5 +1,7 @@
 #include "usb_core.h"
 #include "usb_queue.h"
+#include "usb_endpoint.h"
+
 #include <stdbool.h>
 
 typedef enum {

@@ -53,7 +53,9 @@ typedef struct
     usb_request_handler_fn reserved;
 } USBRequestHandlers;
 
-typedef void (*USBEvent_cb)();
+typedef void (*USBEvent_cb)(void);
+typedef void (*Endpoint_cb)(USBEndpoint *const endpoint);
+typedef void *(*Alloc_cb)(size_t num_bytes, size_t alignment);
 
 typedef struct
 {
@@ -74,50 +76,6 @@ typedef struct
     USBEvent_cb detach;
 } USBDevice;
 
-typedef struct __attribute__((packed))
-{
-    uint8_t request_type;
-    uint8_t request;
-    union {
-        struct
-        {
-            uint8_t value_l;
-            uint8_t value_h;
-        };
-        uint16_t value;
-    };
-    union {
-        struct
-        {
-            uint8_t index_l;
-            uint8_t index_h;
-        };
-        uint16_t index;
-    };
-    union {
-        struct
-        {
-            uint8_t length_l;
-            uint8_t length_h;
-        };
-        uint16_t length;
-    };
-} USBSetup;
-
-struct USBEndpoint
-{
-    USBSetup setup;
-    uint8_t buffer[8]; // Buffer for use during IN stage.
-    uint_fast8_t address;
-    USBDevice *device;
-    USBEndpoint *in;
-    USBEndpoint *out;
-    void (*setup_complete)(USBEndpoint *const endpoint);
-    void (*transfer_complete)(USBEndpoint *const endpoint);
-};
-
-typedef void (*Endpoint_cb)(USBEndpoint *const endpoint);
-typedef void *(*Alloc_cb)(size_t num_bytes, size_t alignment);
 
 USBEndpoint *usb_endpoint_create(
     uint8_t bEndpointAddress,

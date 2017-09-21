@@ -3,6 +3,7 @@
 #include <stddef.h>
 
 #include "mcu_usb.h"
+#include "usb_endpoint.h"
 #include "sync.h"
 #include <lpc_tools/irq.h>
 
