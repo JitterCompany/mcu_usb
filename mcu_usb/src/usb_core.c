@@ -676,6 +676,17 @@ void usb_bus_reset(
 	//}
 }
 
+static void usb_interrupt_disable(
+	USBDevice* const device
+) {
+	if( device->controller == 0 ) {
+		NVIC_DisableIRQ(USB0_IRQn);
+	}
+	if( device->controller == 1 ) {
+		NVIC_DisableIRQ(USB1_IRQn);
+	}
+}
+
 static void usb_interrupt_enable(
 	USBDevice* const device
 ) {
@@ -693,26 +704,37 @@ void usb_device_init(
 	if( device->controller == 0 ) {
 		devices[0] = device;
 	
-		Chip_Clock_DisablePLL(CGU_USB_PLL);
+		//Chip_Clock_DisablePLL(CGU_USB_PLL);
+		Chip_USB0_Init();
+
+			// /* Set up USB PLL */
+			// const CGU_USBAUDIO_PLL_SETUP_T usbPLLSetup = {
+			// 	0x0000601D,	/* Default control with main osc input, PLL disabled */
+			// 	0x06167FFA,	/* M-divider value for 480MHz output from 12MHz input */
+			// 	0x00000000,	/* N-divider value */
+			// 	0x00000000,	/* Not applicable for USB PLL */
+			// 	480000000   /* PLL output frequency */
+			// };
+			// /* No need to setup anything if PLL is already setup for the frequency */
+			// if (Chip_Clock_GetClockInputHz(CLKIN_USBPLL) == usbPLLSetup.freq)
+			// return ;
+
+			// /* Setup default USB PLL state for a 480MHz output and attach */
+			// Chip_Clock_SetupPLL(CLKIN_CRYSTAL, CGU_USB_PLL, &usbPLLSetup);
+
+			// /* enable USB PLL */
+			// Chip_Clock_EnablePLL(CGU_USB_PLL);
+
+			// /* Wait for PLL lock */
+			// while (!(Chip_Clock_GetPLLStatus(CGU_USB_PLL) & CGU_PLL_LOCKED)) {}		
+			// /* Setup USB0 base clock as clock out from USB PLL */
+			// Chip_Clock_SetBaseClock( CLK_BASE_USB0, CLKIN_USBPLL, true, true);
 		
-		// setup and enable 480Mhz USB pll
-		const CGU_USBAUDIO_PLL_SETUP_T pll_setup = {
-			.ctrl = (1 << 2) | (1 << 3) | (1 << 4), // DIRECTI, DIRECTO, CLKEN
-			.mdiv = 0x06167FFA,                     // See user manual 13.8.3
-			.ndiv = 0x00202062,                     // WTF: Not used? see DIRECTI/O
-			.fract = 0,                             // Not used for USB
-			.freq = 480000000
-		};
-		Chip_Clock_SetupPLL(CLKIN_CRYSTAL, CGU_USB_PLL, &pll_setup);
-		while (!(Chip_Clock_GetPLLStatus(CGU_USB_PLL) & CGU_PLL_LOCKED));
-
-
-		// enable USB0 base clock
-		Chip_Clock_EnableBaseClock(CLK_BASE_USB0);
-		Chip_Clock_EnableOpts(CLK_MX_USB0, true, true, 1);
-
-		// Turn on the USB phy
-		Chip_CREG_EnableUSB0Phy();
+			// /* enable USB main clock */
+			// Chip_Clock_EnableBaseClock(CLK_BASE_USB0);
+			// Chip_Clock_EnableOpts(CLK_MX_USB0, true, true, 1);
+			// /* enable USB0 phy */
+			// //Chip_CREG_EnableUSB0Phy();
 
 		usb_controller_reset(device);
 		usb_controller_set_device_mode(device);
@@ -729,16 +751,23 @@ void usb_device_init(
 			| USB0_USBINTR_D_UEE
 			| USB0_USBINTR_D_PCE
 			| USB0_USBINTR_D_URE
-			//| USB0_USBINTR_D_SRE
 			| USB0_USBINTR_D_SLE
+			//| USB0_USBINTR_D_SRE
 			//| USB0_USBINTR_D_NAKE
 			;
+		USB0_OTGSC |= USB0_OTGSC_BSEIE | USB0_OTGSC_BSVIE;
+
+		
+		
 	}
 	if( device->controller == 1 ) {
 		devices[1] = device;
 	
 		//TODO init USB1 clocking
 		//usb_phy_enable(device);
+		// Uses CLK_IDIVA and CLK_IDIV_D. Probably unnecessary
+		Chip_USB1_Init();
+		
 		usb_controller_reset(device);
 		usb_controller_set_device_mode(device);
 	
@@ -764,11 +793,71 @@ void usb_device_init(
 	
 }
 
+void usb_set_vbus_charge(USBDevice* const device, bool enabled)
+{
+	if (device->controller == 0) {
+		if (enabled) {
+			USB0_OTGSC |= USB0_OTGSC_VC;
+			// also disable discharge bit
+			USB0_OTGSC &= ~USB0_OTGSC_VD;
+		} else {
+			USB0_OTGSC &= ~USB0_OTGSC_VC;	
+		}
+	}
+}
+
+void usb_set_vbus_discharge(USBDevice* const device, bool enabled)
+{
+	if (device->controller == 0) {
+		if (enabled) {
+			USB0_OTGSC |= USB0_OTGSC_VD;
+			// also disable charge bit
+			USB0_OTGSC &= ~USB0_OTGSC_VC;
+		} else {
+			USB0_OTGSC &= ~USB0_OTGSC_VD;	
+		}
+	}
+}
+
+void usb_disable_phy_clock()
+{
+	USB0_PORTSC1_D |= USB0_PORTSC1_D_PHCD;
+}
+
+void usb_enable_phy_clock()
+{
+	USB0_PORTSC1_D &= ~USB0_PORTSC1_D_PHCD;
+}
+
 void usb_run(
 	USBDevice* const device
 ) {
 	usb_interrupt_enable(device);
 	usb_controller_run(device);
+}
+
+void usb_stop(USBDevice* const device)
+{
+	usb_controller_stop(device);
+	usb_interrupt_disable(device);
+}
+
+bool usb_device_is_suspended(USBDevice* const device)
+{
+	if (device->controller == 0) {
+		return USB0_PORTSC1_D & USB0_PORTSC1_D_SUSP;
+	}
+	// TODO USB1
+	return false;
+}
+
+bool usb_device_is_attached(USBDevice* const device)
+{
+	if (device->controller == 0) {
+		return USB0_PORTSC1_D & USB0_PORTSC1_D_CCS;
+	}
+	// TODO USB1
+	return false;
 }
 
 static void copy_setup(USBSetup* const dst, const volatile uint8_t* const src) {
@@ -976,6 +1065,25 @@ void USB0_IRQHandler() {
 		// Both the TX/RX endpoint NAK bit and corresponding TX/RX endpoint
 		// NAK enable bit are set.
 	}
+
+	if (USB0_OTGSC & USB0_OTGSC_BSEIE) {
+		//clear bit
+		USB0_OTGSC |= USB0_OTGSC_BSEIE;
+		//if ((USB0_OTGSC & USB0_OTGSC_BSE) && devices[0]->detach) {			
+		if (devices[0]->detach) {
+			devices[0]->detach();
+		}
+	}
+
+	if (USB0_OTGSC & USB0_OTGSC_BSVIE) {
+		//clear bit
+		USB0_OTGSC |= USB0_OTGSC_BSVIE;
+
+		//if ((USB0_OTGSC & USB0_OTGSC_BSV) && devices[0]->attach) {
+		if (devices[0]->attach) {				
+			devices[0]->attach();
+		}
+	}
 }
 
 void USB1_IRQHandler() {
@@ -1029,4 +1137,5 @@ void USB1_IRQHandler() {
 		// Both the TX/RX endpoint NAK bit and corresponding TX/RX endpoint
 		// NAK enable bit are set.
 	}
+	
 }

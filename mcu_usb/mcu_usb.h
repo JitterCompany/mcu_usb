@@ -70,6 +70,8 @@ typedef struct
     USBEvent_cb port_change;
     USBEvent_cb bus_reset;
     USBEvent_cb suspend;
+    USBEvent_cb attach;
+    USBEvent_cb detach;
 } USBDevice;
 
 typedef struct __attribute__((packed))
@@ -131,9 +133,12 @@ void usb_device_init(
 void usb_endpoint_init(
     const USBEndpoint *const endpoint);
 
-void usb_run(
-    USBDevice *const device);
+bool usb_device_is_suspended(USBDevice* const device);
+bool usb_device_is_attached(USBDevice* const device);
 
+void usb_run(USBDevice *const device);
+void usb_stop(USBDevice* const device);
+    
 void usb_set_configuration_changed_cb(
     void (*callback)(USBDevice *const));
 
@@ -168,5 +173,11 @@ void usb_control_in_complete(
 
 void usb_control_out_complete(
     USBEndpoint *const endpoint);
+
+void usb_disable_phy_clock();
+void usb_enable_phy_clock();
+void usb_set_vbus_charge(USBDevice* const device, bool enabled);
+void usb_set_vbus_discharge(USBDevice* const device, bool enabled);
+
 
 #endif
