@@ -117,21 +117,23 @@ struct USBEndpoint
 };
 
 typedef void (*Endpoint_cb)(USBEndpoint *const endpoint);
+typedef void *(*Alloc_cb)(size_t num_bytes, size_t alignment);
 
+USBEndpoint *usb_endpoint_create(
+    uint8_t bEndpointAddress,
+    USBDevice *device, 
+    Endpoint_cb setup_complete, 
+    Endpoint_cb transfer_complete,
+    size_t pool_size,
+    Alloc_cb alloc_cb);
 
-USBEndpoint *usb_endpoint_create(USBEndpoint *endpoint, uint8_t bEndpointAddress,
-                                 USBDevice *device, USBEndpoint *other_endpoint,
-                                 Endpoint_cb setup_complete, Endpoint_cb transfer_complete);
-
-bool usb_endpoint_alloc_queue(USBEndpoint *endpoint, size_t pool_size, void *(*alloc_cb)(size_t));
+bool usb_pair_endpoints(USBEndpoint *ep_a, USBEndpoint *ep_b);
 
 void usb_peripheral_reset();
 
-void usb_device_init(
-    USBDevice *const device);
+void usb_device_init(USBDevice *const device);
 
-void usb_endpoint_init(
-    const USBEndpoint *const endpoint);
+void usb_endpoint_init(const USBEndpoint *const endpoint);
 
 bool usb_device_is_suspended(USBDevice* const device);
 bool usb_device_is_attached(USBDevice* const device);
@@ -139,11 +141,9 @@ bool usb_device_is_attached(USBDevice* const device);
 void usb_run(USBDevice *const device);
 void usb_stop(USBDevice* const device);
     
-void usb_set_configuration_changed_cb(
-    void (*callback)(USBDevice *const));
+void usb_set_configuration_changed_cb(void (*callback)(USBDevice *const));
 
-USBRequestStatus usb_standard_request(
-    USBEndpoint *const endpoint,
+USBRequestStatus usb_standard_request(USBEndpoint *const endpoint, 
     const USBTransferStage stage);
 
 typedef void (*transfer_completion_cb)(void *, unsigned int);
@@ -162,17 +162,13 @@ int usb_transfer_schedule_block(
     const transfer_completion_cb completion_cb,
     void *const user_data);
 
-void usb_queue_transfer_complete(
-    USBEndpoint *const endpoint);
+void usb_queue_transfer_complete(USBEndpoint *const endpoint);
 
-void usb_setup_complete(
-    USBEndpoint *const endpoint);
+void usb_setup_complete(USBEndpoint *const endpoint);
 
-void usb_control_in_complete(
-    USBEndpoint *const endpoint);
+void usb_control_in_complete(USBEndpoint *const endpoint);
 
-void usb_control_out_complete(
-    USBEndpoint *const endpoint);
+void usb_control_out_complete(USBEndpoint *const endpoint);
 
 void usb_disable_phy_clock();
 void usb_enable_phy_clock();

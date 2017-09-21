@@ -41,9 +41,7 @@ static uint_fast8_t usb_endpoint_address(
     return ((direction == USB_TRANSFER_DIRECTION_IN) ? 0x80 : 0x00) + number;
 }
 
-static bool usb_endpoint_is_in(const uint_fast8_t endpoint_address) {
-    return (endpoint_address & 0x80) ? true : false;
-}
+
 
 static uint_fast8_t usb_endpoint_number(const uint_fast8_t endpoint_address) {
     return (endpoint_address & 0xF);
