@@ -42,15 +42,21 @@ void usb_queue_init(
 static usb_transfer_t* allocate_transfer(
         usb_queue_t* const queue
 ) {
-        bool aborted;
         usb_transfer_t* transfer;
         if (queue->free_transfers == NULL)
-                return NULL;
-
+        return NULL;
+#ifdef CORE_M4
+        bool aborted;
         do {
                 transfer = (void *) __ldrex((uint32_t *) &queue->free_transfers);
                 aborted = __strex((uint32_t) transfer->next, (uint32_t *) &queue->free_transfers);
         } while (aborted);
+#else
+        bool sts = irq_disable();
+        transfer = queue->free_transfers;
+        queue->free_transfers = transfer->next;
+        irq_restore(sts);
+#endif
         transfer->next = NULL;
         return transfer;
 }
@@ -59,11 +65,18 @@ static usb_transfer_t* allocate_transfer(
 static void free_transfer(usb_transfer_t* const transfer)
 {
         usb_queue_t* const queue = transfer->queue;
+#ifdef CORE_M4        
         bool aborted;
         do {
                 transfer->next = (void *) __ldrex((uint32_t *) &queue->free_transfers);
                 aborted = __strex((uint32_t) transfer, (uint32_t *) &queue->free_transfers);
         } while (aborted);
+#else
+        bool sts = irq_disable();
+        transfer->next = queue->free_transfers;
+        queue->free_transfers = transfer;
+        irq_restore(sts);
+#endif
 }
 
 /* Add a transfer to the end of an endpoint's queue. Returns the old
