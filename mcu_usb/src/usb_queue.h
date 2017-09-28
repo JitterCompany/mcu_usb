@@ -39,9 +39,7 @@ typedef struct _usb_queue_t USBQueue;
 
 void usb_queue_flush_endpoint(const USBEndpoint* const endpoint);
 
-int usb_transfer_schedule_ack(
-	const USBEndpoint* const endpoint
-);
+
 
 void usb_queue_init(
         usb_queue_t* const queue

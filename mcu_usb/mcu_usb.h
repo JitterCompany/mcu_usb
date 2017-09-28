@@ -93,6 +93,9 @@ void usb_device_init(USBDevice *const device);
 
 void usb_endpoint_init(const USBEndpoint *const endpoint);
 
+uint8_t usb_endpoint_get_setup_request(const USBEndpoint *const endpoint);
+USBEndpoint* usb_endpoint_get_in_ep(const USBEndpoint *const endpoint);
+
 bool usb_device_is_suspended(USBDevice* const device);
 bool usb_device_is_attached(USBDevice* const device);
 
@@ -121,6 +124,8 @@ int usb_transfer_schedule_block(
     void *const user_data);
 
 void usb_queue_transfer_complete(USBEndpoint *const endpoint);
+
+int usb_transfer_schedule_ack(const USBEndpoint* const endpoint);
 
 void usb_setup_complete(USBEndpoint *const endpoint);
 
