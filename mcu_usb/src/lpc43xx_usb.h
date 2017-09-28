@@ -36,7 +36,7 @@ extern "C" {
 
 		// force next member alinged on the next word
 		uint32_t : 0;
-	} fields;
+	};
 	volatile uint32_t word;
 };
 

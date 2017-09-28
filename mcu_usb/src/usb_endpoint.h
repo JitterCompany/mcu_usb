@@ -5,36 +5,6 @@
 #include <stddef.h>
 #include "mcu_usb.h"
 
-typedef struct __attribute__((packed))
-{
-    uint8_t request_type;
-    uint8_t request;
-    union {
-        struct
-        {
-            uint8_t value_l;
-            uint8_t value_h;
-        };
-        uint16_t value;
-    };
-    union {
-        struct
-        {
-            uint8_t index_l;
-            uint8_t index_h;
-        };
-        uint16_t index;
-    };
-    union {
-        struct
-        {
-            uint8_t length_l;
-            uint8_t length_h;
-        };
-        uint16_t length;
-    };
-} USBSetup;
-
 struct USBEndpoint
 {
     USBSetup setup;

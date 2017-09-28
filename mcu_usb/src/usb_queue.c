@@ -130,10 +130,10 @@ int usb_transfer_schedule(
 	// Configure the transfer descriptor
         td->next_dtd_pointer = USB_TD_NEXT_DTD_POINTER_TERMINATE;
         td->capabilities.word = 0;
-        td->capabilities.fields.total_bytes = maximum_length; //USB_TD_DTD_TOKEN_TOTAL_BYTES(maximum_length);
-        td->capabilities.fields.int_on_complete = 1; //USB_TD_DTD_TOKEN_IOC;
-        td->capabilities.fields.multiplier_override = 0; //USB_TD_DTD_TOKEN_MULTO(0);
-        td->capabilities.fields.active = 1; //USB_TD_DTD_TOKEN_STATUS_ACTIVE;
+        td->capabilities.total_bytes = maximum_length; //USB_TD_DTD_TOKEN_TOTAL_BYTES(maximum_length);
+        td->capabilities.int_on_complete = 1; //USB_TD_DTD_TOKEN_IOC;
+        td->capabilities.multiplier_override = 0; //USB_TD_DTD_TOKEN_MULTO(0);
+        td->capabilities.active = 1; //USB_TD_DTD_TOKEN_STATUS_ACTIVE;
 
 	// td->capabilities.word =
 	// 	  USB_TD_DTD_TOKEN_TOTAL_BYTES(maximum_length)
@@ -215,7 +215,7 @@ void usb_queue_transfer_complete(USBEndpoint* const endpoint)
                 usb_transfer_t* next = transfer->next;
 
                 // Invoke completion callback
-                unsigned int total_bytes = transfer->td.capabilities.fields.total_bytes;
+                unsigned int total_bytes = transfer->td.capabilities.total_bytes;
                 unsigned int transferred = transfer->maximum_length - total_bytes;
                 if (transfer->completion_cb) {
                         transfer->completion_cb(transfer->user_data, transferred);

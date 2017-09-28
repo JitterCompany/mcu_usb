@@ -94,6 +94,11 @@ uint8_t usb_endpoint_get_setup_request(const USBEndpoint *const endpoint)
     return endpoint->setup.request;
 }
 
+USBSetup* usb_endpoint_get_setup(const USBEndpoint *const endpoint)
+{
+    return &endpoint->setup;
+}
+
 USBEndpoint* usb_endpoint_get_in_ep(const USBEndpoint *const endpoint)
 {
     return endpoint->in;

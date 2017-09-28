@@ -9,6 +9,37 @@
 
 typedef struct USBEndpoint USBEndpoint;
 
+
+typedef struct __attribute__((packed))
+{
+    uint8_t request_type;
+    uint8_t request;
+    union {
+        struct
+        {
+            uint8_t value_l;
+            uint8_t value_h;
+        };
+        uint16_t value;
+    };
+    union {
+        struct
+        {
+            uint8_t index_l;
+            uint8_t index_h;
+        };
+        uint16_t index;
+    };
+    union {
+        struct
+        {
+            uint8_t length_l;
+            uint8_t length_h;
+        };
+        uint16_t length;
+    };
+} USBSetup;
+
 typedef enum {
     USB_TRANSFER_TYPE_CONTROL = 0,
     USB_TRANSFER_TYPE_ISOCHRONOUS = 1,
@@ -94,6 +125,7 @@ void usb_device_init(USBDevice *const device);
 void usb_endpoint_init(const USBEndpoint *const endpoint);
 
 uint8_t usb_endpoint_get_setup_request(const USBEndpoint *const endpoint);
+USBSetup* usb_endpoint_get_setup(const USBEndpoint *const endpoint);
 USBEndpoint* usb_endpoint_get_in_ep(const USBEndpoint *const endpoint);
 
 bool usb_device_is_suspended(USBDevice* const device);
