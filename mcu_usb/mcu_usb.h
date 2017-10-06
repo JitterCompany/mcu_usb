@@ -1,11 +1,12 @@
 #ifndef __MCU_USB_H__
 #define __MCU_USB_H__
 
-#include "descriptor_types.h"
 
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+
+#include "descriptor_types.h"
 
 typedef struct USBEndpoint USBEndpoint;
 
@@ -127,6 +128,7 @@ void usb_endpoint_init(const USBEndpoint *const endpoint);
 uint8_t usb_endpoint_get_setup_request(const USBEndpoint *const endpoint);
 USBSetup* usb_endpoint_get_setup(const USBEndpoint *const endpoint);
 USBEndpoint* usb_endpoint_get_in_ep(const USBEndpoint *const endpoint);
+USBEndpoint* usb_endpoint_get_out_ep(const USBEndpoint *const endpoint);
 
 bool usb_device_is_suspended(USBDevice* const device);
 bool usb_device_is_attached(USBDevice* const device);
@@ -170,5 +172,12 @@ void usb_enable_phy_clock();
 void usb_set_vbus_charge(USBDevice* const device, bool enabled);
 void usb_set_vbus_discharge(USBDevice* const device, bool enabled);
 
-
+// for debugging
+uint32_t queue_free_space(USBEndpoint *const endpoint);
+void usb_queue_flush_endpoint(const USBEndpoint* const endpoint);
+void usb_endpoint_flush(
+	const USBEndpoint* const endpoint
+);
+int usb_queue_transferred_bytes(USBEndpoint* const endpoint);
+bool usb_queue_active(USBEndpoint* const endpoint);
 #endif

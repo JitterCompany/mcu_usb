@@ -976,6 +976,7 @@ static void usb_check_for_transfer_events(const USBDevice* const device) {
 				usb_endpoint_from_address(
 					usb_endpoint_address(USB_TRANSFER_DIRECTION_OUT, i),
 					device);
+				
 				if( endpoint && endpoint->transfer_complete ) {
 					endpoint->transfer_complete(endpoint);
 				} 

@@ -85,9 +85,7 @@ void usb_endpoint_disable(
 	const USBEndpoint* const endpoint
 );
 
-void usb_endpoint_flush(
-	const USBEndpoint* const endpoint
-);
+
 
 bool usb_endpoint_is_ready(
 	const USBEndpoint* const endpoint

@@ -37,7 +37,6 @@ typedef struct _usb_queue_t USBQueue;
                 .pool_size = _pool_size                                 \
         };
 
-void usb_queue_flush_endpoint(const USBEndpoint* const endpoint);
 
 
 

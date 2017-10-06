@@ -38,6 +38,8 @@ void usb_queue_init(
         t->queue = queue;
 }
 
+
+
 /* Allocate a transfer */
 static usb_transfer_t* allocate_transfer(
         usb_queue_t* const queue
@@ -129,18 +131,18 @@ int usb_transfer_schedule(
 
 	// Configure the transfer descriptor
         td->next_dtd_pointer = USB_TD_NEXT_DTD_POINTER_TERMINATE;
-        td->capabilities.word = 0;
-        td->capabilities.total_bytes = maximum_length; //USB_TD_DTD_TOKEN_TOTAL_BYTES(maximum_length);
-        td->capabilities.int_on_complete = 1; //USB_TD_DTD_TOKEN_IOC;
-        td->capabilities.multiplier_override = 0; //USB_TD_DTD_TOKEN_MULTO(0);
-        td->capabilities.active = 1; //USB_TD_DTD_TOKEN_STATUS_ACTIVE;
+        // td->capabilities.word = 0;
+        // td->capabilities.total_bytes = maximum_length; //USB_TD_DTD_TOKEN_TOTAL_BYTES(maximum_length);
+        // td->capabilities.int_on_complete = 1; //USB_TD_DTD_TOKEN_IOC;
+        // td->capabilities.multiplier_override = 0; //USB_TD_DTD_TOKEN_MULTO(0);
+        // td->capabilities.active = 1; //USB_TD_DTD_TOKEN_STATUS_ACTIVE;
 
-	// td->capabilities.word =
-	// 	  USB_TD_DTD_TOKEN_TOTAL_BYTES(maximum_length)
-	// 	| USB_TD_DTD_TOKEN_IOC
-	// 	| USB_TD_DTD_TOKEN_MULTO(0)
-	// 	| USB_TD_DTD_TOKEN_STATUS_ACTIVE
-        // 	;
+	td->capabilities.word =
+		  USB_TD_DTD_TOKEN_TOTAL_BYTES(maximum_length)
+		| USB_TD_DTD_TOKEN_IOC
+		| USB_TD_DTD_TOKEN_MULTO(0)
+		| USB_TD_DTD_TOKEN_STATUS_ACTIVE
+        	;
         
 	td->buffer_pointer_page[0] =  (uint32_t)data;
 	td->buffer_pointer_page[1] = ((uint32_t)data + 0x1000) & 0xfffff000;
@@ -225,4 +227,46 @@ void usb_queue_transfer_complete(USBEndpoint* const endpoint)
                 free_transfer(transfer);
                 transfer = next;
         }
+}
+
+bool usb_queue_active(USBEndpoint *const endpoint)
+{
+        usb_queue_t* const queue = endpoint_queue(endpoint);
+        if (!queue) {
+                return 0;
+        }
+        usb_transfer_t* transfer = queue->active;
+        return transfer != NULL;
+}
+
+uint32_t queue_free_space(USBEndpoint *const endpoint)
+{
+        usb_queue_t* const queue = endpoint_queue(endpoint);
+        if (!queue) {
+                return 0;
+        }
+        usb_transfer_t* transfer = queue->free_transfers;
+        uint32_t count = 0;
+        while(transfer) {
+                count++;
+                transfer = transfer->next;
+        }
+        return count;
+}
+
+int usb_queue_transferred_bytes(USBEndpoint* const endpoint)
+{
+        usb_queue_t* const queue = endpoint_queue(endpoint);
+        if (queue == NULL) {
+                return -1;
+        }
+        usb_transfer_t* transfer = queue->active;
+        if (transfer == NULL) {
+                //bool d = false;
+                //while(!d);
+                return -2;
+        }
+        unsigned int total_bytes = transfer->td.capabilities.total_bytes;
+        int transferred = transfer->maximum_length - total_bytes;
+        return transferred;
 }

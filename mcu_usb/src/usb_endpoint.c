@@ -104,6 +104,11 @@ USBEndpoint* usb_endpoint_get_in_ep(const USBEndpoint *const endpoint)
     return endpoint->in;
 }
 
+USBEndpoint* usb_endpoint_get_out_ep(const USBEndpoint *const endpoint)
+{
+    return endpoint->out;
+}
+
 USBTransferType usb_endpoint_descriptor_transfer_type(
 	const USBDescriptorEndpoint* const endpoint_descriptor
 ) {
