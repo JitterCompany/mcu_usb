@@ -115,7 +115,7 @@ void *usb_ringbuffer_claim_read_ptr(USBRingbuffer *ctx);
  *                      NULL may be passed in case you don't have access to
  *                      the read_ptr. In this case the check is skipped.
  */
-void usb_ringbuffer_cancel_read(USBRingbuffer *ctx, void *read_ptr);
+void usb_ringbuffer_cancel_read(USBRingbuffer *ctx, const void *read_ptr);
 
 
 /**
@@ -135,7 +135,7 @@ void usb_ringbuffer_cancel_read(USBRingbuffer *ctx, void *read_ptr);
  *                      NULL may be passed in case you don't have access to
  *                      the read_ptr. In this case the check is skipped.
  */
-void usb_ringbuffer_complete_read(USBRingbuffer *ctx, void *read_ptr);
+void usb_ringbuffer_complete_read(USBRingbuffer *ctx, const void *read_ptr);
 
 
 void *usb_ringbuffer_claim_read_ptr(USBRingbuffer *ctx);
@@ -145,6 +145,8 @@ void *usb_ringbuffer_claim_read_ptr(USBRingbuffer *ctx);
 
 struct usb_ringbuffer {
     Ringbuffer *ring;
+    volatile RingbufferIndex next_write;
+    volatile RingbufferIndex next_read;
 };
 
 #endif
