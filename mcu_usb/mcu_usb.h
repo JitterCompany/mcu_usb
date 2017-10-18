@@ -141,7 +141,7 @@ void usb_set_configuration_changed_cb(void (*callback)(USBDevice *const));
 USBRequestStatus usb_standard_request(USBEndpoint *const endpoint, 
     const USBTransferStage stage);
 
-typedef void (*transfer_completion_cb)(void *, unsigned int);
+typedef void (*transfer_completion_cb)(void *, int);
 
 int usb_transfer_schedule(
     const USBEndpoint *const endpoint,
