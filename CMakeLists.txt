@@ -43,7 +43,7 @@ include(cmake/chip_libraries.cmake)
 
 CPM_AddModule("lpc_tools"
     GIT_REPOSITORY "https://github.com/JitterCompany/lpc_tools.git"
-    GIT_TAG "2.5.1")
+    GIT_TAG "2.5.2")
 
 CPM_AddModule("c_utils"
     GIT_REPOSITORY "https://github.com/JitterCompany/c_utils.git"
@@ -54,6 +54,9 @@ CPM_InitModule(${CPM_MODULE_NAME})
 #------------------------------------------------------------------------------
 # Project sources / settings
 #------------------------------------------------------------------------------
+
+# linking against multiple different versions of this library is not a good idea                                                                                         
+CPM_ForceOnlyOneModuleVersion()
 
 file(GLOB SOURCES 
     ${CPM_MODULE_NAME}/src/*.c
